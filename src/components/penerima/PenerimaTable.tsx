@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
   Users,
@@ -67,13 +67,29 @@ const EMPTY_STATS: StatistikPenerima = {
   progress: 0,
 };
 
-export function PenerimaTable() {
-  const [data, setData] = useState<PenerimaDTO[]>([]);
-  const [stats, setStats] = useState<StatistikPenerima>(EMPTY_STATS);
-  const [loading, setLoading] = useState(true);
+export interface PenerimaInitialData {
+  data: PenerimaDTO[];
+  total: number;
+  totalPages: number;
+  stats: StatistikPenerima;
+}
+
+export function PenerimaTable({
+  initialData,
+}: {
+  initialData?: PenerimaInitialData;
+}) {
+  const [data, setData] = useState<PenerimaDTO[]>(initialData?.data ?? []);
+  const [stats, setStats] = useState<StatistikPenerima>(
+    initialData?.stats ?? EMPTY_STATS
+  );
+  const [loading, setLoading] = useState(!initialData);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(initialData?.totalPages ?? 1);
+  const [total, setTotal] = useState(initialData?.total ?? 0);
+
+  // Lewati fetch pertama bila data awal sudah dirender server (filter default).
+  const skipInitialFetch = useRef(Boolean(initialData));
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -128,6 +144,11 @@ export function PenerimaTable() {
   }, [page, statusFilter, debouncedSearch]);
 
   useEffect(() => {
+    // Data awal sudah dari server -> jangan fetch ulang saat mount.
+    if (skipInitialFetch.current) {
+      skipInitialFetch.current = false;
+      return;
+    }
     fetchData();
   }, [fetchData]);
 

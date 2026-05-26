@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -33,6 +32,7 @@ export function Navbar({ userEmail }: { userEmail: string }) {
   async function handleLogout() {
     setLoggingOut(true);
     try {
+      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       await supabase.auth.signOut();
       toast.success("Berhasil keluar");

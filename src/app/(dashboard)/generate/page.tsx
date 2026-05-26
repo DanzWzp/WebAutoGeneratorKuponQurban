@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Printer, Loader2, ArrowLeft, FileText, Info } from "lucide-react";
 import { toast } from "sonner";
@@ -16,7 +17,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { KuponPreview } from "@/components/kupon/KuponPreview";
+
+// Pratinjau memakai bwip-js (berat) -> muat hanya saat dibutuhkan, di klien.
+const KuponPreview = dynamic(
+  () => import("@/components/kupon/KuponPreview").then((m) => m.KuponPreview),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="mx-auto h-24 w-full max-w-2xl" />,
+  }
+);
 
 export default function GeneratePage() {
   const [stats, setStats] = useState<StatistikPenerima | null>(null);
@@ -40,8 +49,9 @@ export default function GeneratePage() {
     })();
   }, []);
 
+  const COUPONS_PER_PAGE = 4;
   const total = stats?.total ?? 0;
-  const pages = Math.ceil(total / 8);
+  const pages = Math.ceil(total / COUPONS_PER_PAGE);
 
   async function handleDownload() {
     setPdfLoading(true);
@@ -95,7 +105,7 @@ export default function GeneratePage() {
               <p>
                 Akan menghasilkan <strong>{pages}</strong> halaman A4 untuk{" "}
                 <strong>{total}</strong> penerima
-                {total > 0 ? " (8 kupon per halaman)." : "."}
+                {total > 0 ? ` (${COUPONS_PER_PAGE} kupon per halaman).` : "."}
               </p>
             </div>
           )}

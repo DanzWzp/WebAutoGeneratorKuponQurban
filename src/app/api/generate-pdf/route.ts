@@ -5,8 +5,20 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { generateBarcodeDataUrl } from "@/lib/barcode";
-import { getTemplateDataUrl } from "@/lib/template";
+import { getTemplate } from "@/lib/template";
 import { KuponPDF, type KuponPenerima } from "@/components/kupon/KuponPDF";
+
+/** Bersihkan nama untuk dipakai di nama file (hilangkan karakter tidak aman). */
+function slugForFile(s: string): string {
+  return (
+    s
+      .normalize("NFKD")
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .slice(0, 40) || "kupon"
+  );
+}
 
 // PDF + barcode butuh Node runtime (bukan Edge).
 export const runtime = "nodejs";
@@ -57,15 +69,22 @@ export async function POST(req: NextRequest) {
       }))
     );
 
-    const templateDataUrl = getTemplateDataUrl();
+    const template = getTemplate();
 
     const element = createElement(KuponPDF, {
       penerimaList: enriched,
-      templateDataUrl,
+      templateDataUrl: template?.dataUrl ?? null,
+      templateRatio: template?.ratio ?? null,
     }) as Parameters<typeof renderToBuffer>[0];
 
     const buffer = await renderToBuffer(element);
-    const filename = `kupon-kurban-${new Date().toISOString().split("T")[0]}.pdf`;
+
+    // Nama file: sertakan nama penerima bila hanya 1 kupon, jika tidak pakai tanggal.
+    const today = new Date().toISOString().split("T")[0];
+    const filename =
+      penerimaList.length === 1
+        ? `kupon-${slugForFile(penerimaList[0].nama)}-${penerimaList[0].kodeKupon}.pdf`
+        : `kupon-kurban-${today}.pdf`;
 
     return new Response(new Uint8Array(buffer), {
       headers: {

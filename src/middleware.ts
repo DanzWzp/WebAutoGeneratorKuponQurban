@@ -9,11 +9,12 @@ export const config = {
   matcher: [
     /*
      * Cocokkan semua request kecuali:
+     * - api (route handler punya pengecekan auth sendiri -> hindari getUser ganda)
      * - _next/static (file statis)
      * - _next/image (optimasi gambar)
      * - favicon.ico
      * - file dengan ekstensi gambar/font/audio (mis. template-kupon.jpg, beep.mp3)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp3|wav|ico|woff2?)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp3|wav|ico|woff2?)$).*)",
   ],
 };

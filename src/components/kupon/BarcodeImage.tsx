@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { toCanvas } from "bwip-js";
+import { toCanvas } from "bwip-js/browser";
 
 /**
  * Render barcode CODE128 ke <canvas> di browser (untuk preview di layar).

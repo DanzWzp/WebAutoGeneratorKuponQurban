@@ -48,6 +48,7 @@ export interface RedeemResponse {
 
 export interface RiwayatItem {
   id: string;
+  penerimaId: string;
   nama: string;
   kodeKupon: string;
   scannedAt: string;

@@ -6,6 +6,8 @@ const nextConfig = {
   // to bundle them into the serverless function in a way that breaks them.
   experimental: {
     serverComponentsExternalPackages: ['@react-pdf/renderer', 'bwip-js'],
+    // Tree-shake import dari paket besar -> bundle client lebih kecil & cepat.
+    optimizePackageImports: ['lucide-react', 'date-fns'],
   },
 };
 

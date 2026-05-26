@@ -2,7 +2,7 @@ import { type NextRequest } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { buildRiwayatWhere } from "@/app/api/riwayat/route";
+import { buildRiwayatWhere } from "@/lib/riwayat-where";
 
 export const dynamic = "force-dynamic";
 
