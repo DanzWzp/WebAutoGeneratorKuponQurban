@@ -1,0 +1,50 @@
+// Prisma schema untuk Generator Kupon Kurban
+// Dokumentasi: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum StatusKupon {
+  AVAILABLE // belum diambil
+  REDEEMED // sudah ditukar
+}
+
+model Penerima {
+  id         String      @id @default(cuid())
+  nama       String
+  kodeKupon  String      @unique // kode random 8 karakter untuk barcode
+  alamat     String?
+  userId     String // Supabase auth user id (uuid) - yang membuat kupon
+  status     StatusKupon @default(AVAILABLE)
+  redeemedAt DateTime? // kapan ditukar
+  redeemedBy String? // userId panitia yang konfirmasi scan
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  redemptions Redemption[]
+
+  @@index([userId])
+  @@index([kodeKupon])
+  @@index([status])
+  @@map("penerima")
+}
+
+model Redemption {
+  id         String   @id @default(cuid())
+  penerimaId String
+  penerima   Penerima @relation(fields: [penerimaId], references: [id], onDelete: Cascade)
+  redeemedBy String // userId panitia
+  scannedAt  DateTime @default(now())
+  userAgent  String? // info device scanner (optional, untuk audit)
+  ipAddress  String? // optional, untuk audit
+
+  @@index([penerimaId])
+  @@map("redemption")
+}
