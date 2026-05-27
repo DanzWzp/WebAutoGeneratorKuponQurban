@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { registerSchema, type RegisterInput } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -41,6 +42,11 @@ export default function RegisterPage() {
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          // Setelah klik link konfirmasi di email -> diarahkan ke callback
+          // yang menukar kode jadi session, lalu lanjut ke /dashboard.
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        },
       });
 
       if (error) {
@@ -96,9 +102,8 @@ export default function RegisterPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="new-password"
               placeholder="Minimal 6 karakter"
               {...register("password")}
@@ -111,9 +116,8 @@ export default function RegisterPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               autoComplete="new-password"
               placeholder="Ulangi password"
               {...register("confirmPassword")}
